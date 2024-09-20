@@ -1,0 +1,44 @@
+﻿@inherits LayoutComponentBase
+@inject Dashboard.Services.LoginService loginService
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+
+        <div class="top-row px-4">
+
+            <div class="title-container">
+                <a class="title" href="/" style="text-decoration:none;">Dashboard</a>
+            </div>
+
+            @if (!loginService.IsLoggedIn)
+            {
+                <a href="login">
+
+                    <Icon Name="IconName.ArrowBarRight" Size="IconSize.x3" />
+
+                </a>
+            }
+            else
+            {
+                <a href="logout">
+                    <Icon Name="IconName.ArrowBarLeft" Size="IconSize.x3" />
+
+                </a>
+            }
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>

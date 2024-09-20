@@ -1,0 +1,75 @@
+﻿@page "/weather"
+@using Dashboard.Services
+@using Dashboard.Model
+@using Microsoft.EntityFrameworkCore
+@inject WeatherApiService WeatherApiService
+@inject Dashboard.Connect.DashboardDbContext DbContext
+@inject Dashboard.Services.LoginService LoginService
+
+<!-- Display the weather data if it is available -->
+@if (weatherData != null)
+{
+    <div class="weather-card">
+        <h2><strong>@weatherData.City</strong></h2>
+        <img src="@weatherData.IconUrl" alt="Weather Icon" />
+        <div class="weather-info">
+            <p class="temperature">Temperature: @weatherData.RoundedTemperature &deg;C</p>
+            <p><strong>Weather:</strong> @weatherData.WeatherMain</p>
+            <p><strong>Description:</strong> @weatherData.WeatherDescription</p>
+            <p><strong>Humidity:</strong> @weatherData.Humidity %</p>
+            <p><strong>Wind Speed:</strong> @weatherData.WindSpeed m/s</p>
+            <p><strong>Timestamp:</strong> @weatherData.Timestamp</p>
+        </div>
+    </div>
+}
+else if (loading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <p>No data available. Please try again later.</p>
+}
+
+@code {
+    private WeatherData weatherData; // Stores the weather data
+    private bool loading; // Indicates if data is being fetched
+    private string city;
+
+    // Called when the component is first loaded
+    protected override async Task OnInitializedAsync()
+    {
+        await SetCityAndFetchWeather(); // Fetch weather data
+    }
+
+    // Determines the city and fetches weather data
+    private async Task SetCityAndFetchWeather()
+    {
+        loading = true; // Start loading
+
+        // Get the city name based on the user's location if logged in
+        if (LoginService.IsLoggedIn)
+        {
+            var user = await DbContext.Users
+                .Include(u => u.Location) // Ensure Location is included
+                .FirstOrDefaultAsync(u => u.Id == LoginService.Id);
+
+            if (user?.Location != null)
+            {
+                city = user.Location.CityName; // Use the city from the user's location
+            }
+            else
+            {
+                city = "London"; // Default city if location not found
+            }
+        }
+        else
+        {
+            city = "London"; // Default city for non-logged-in users
+        }
+
+        // Fetch the weather data for the determined city
+        weatherData = await WeatherApiService.GetWeatherAsync(city);
+        loading = false; // Stop loading
+    }
+}

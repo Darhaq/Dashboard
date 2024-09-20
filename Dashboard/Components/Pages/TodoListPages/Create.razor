@@ -1,0 +1,67 @@
+﻿@page "/todolists/create"
+
+@using Microsoft.EntityFrameworkCore
+@using Dashboard.Model
+@inject Dashboard.Connect.DashboardDbContext DB
+@inject NavigationManager NavigationManager
+@inject Dashboard.Services.LoginService loginService
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h4>TodoList</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="TodoList" OnValidSubmit="AddTodoList" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="userid" class="form-label">UserId:</label>
+                <InputNumber id="userid" @bind-Value="TodoList.UserId" class="form-control" readonly="readonly" />
+                <ValidationMessage For="() => TodoList.UserId" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="title" class="form-label">Title:</label>
+                <InputText id="title" @bind-Value="TodoList.Title" class="form-control" />
+                <ValidationMessage For="() => TodoList.Title" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <InputText id="description" @bind-Value="TodoList.Description" class="form-control" />
+                <ValidationMessage For="() => TodoList.Description" class="text-danger" />
+            </div>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/todo">Back to List</a>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    public TodoList TodoList { get; set; } = new();
+
+
+    protected override void OnInitialized()
+    {
+        TodoList.UserId = loginService.Id;
+    }
+
+
+
+    public async Task AddTodoList()
+    {
+        // Add the location to the context and save it
+        DB.TodoLists.Add(TodoList);
+        await DB.SaveChangesAsync();
+
+        // Navigate to the profile page after successful creation
+        NavigationManager.NavigateTo("/todo");
+    }
+}

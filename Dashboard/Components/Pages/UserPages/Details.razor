@@ -1,0 +1,56 @@
+﻿@page "/users/details"
+
+@using Microsoft.EntityFrameworkCore
+@using Dashboard.Model
+@inject Dashboard.Connect.DashboardDbContext DB
+@inject NavigationManager NavigationManager
+
+<PageTitle>User Details</PageTitle>
+
+
+<div class="details-container">
+    <h4>User Information</h4>
+    <hr />
+    @if (user is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <dl class="row">
+            <dt class="col-sm-3 detail-label">Username</dt>
+            <dd class="col-sm-9 detail-value">@user.Username</dd>
+
+            <dt class="col-sm-3 detail-label">Password</dt>
+            <dd class="col-sm-9 detail-value">@user.Password</dd>
+
+            <dt class="col-sm-3 detail-label">Email</dt>
+            <dd class="col-sm-9 detail-value">@user.Email</dd>
+        </dl>
+        <div class="action-links">
+            <a href="@($"/users/edit?id={user.Id}")" class="btn btn-primary">
+                    <Icon Name="IconName.PencilFill" Size="IconSize.x6" />
+                </a>
+            <a href="@($"/users")" class="btn btn-secondary">
+                <Icon Name="IconName.ArrowLeft" Size="IconSize.x6" />
+            </a>
+        </div>
+    }
+</div>
+
+@code {
+    User? user;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await DB.Users.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (user is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

@@ -1,0 +1,98 @@
+﻿@page "/users/edit"
+
+@using Microsoft.EntityFrameworkCore
+@using Dashboard.Model
+@inject Dashboard.Connect.DashboardDbContext DB
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit User</PageTitle>
+
+<h1>Edit User</h1>
+
+<hr />
+@if (User is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="form-container">
+        <EditForm method="post" Model="User" OnValidSubmit="UpdateUser" class="form">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <input type="hidden" name="User.Id" value="@User.Id" />
+
+            <div class="form-group">
+                <label for="username" class="form-label">Username:</label>
+                <InputText id="username" @bind-Value="User.Username" class="form-control" />
+                <ValidationMessage For="() => User.Username" class="text-danger" />
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password:</label>
+                <InputText id="password" @bind-Value="User.Password" class="form-control" />
+                <ValidationMessage For="() => User.Password" class="text-danger" />
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email:</label>
+                <InputText id="email" @bind-Value="User.Email" class="form-control" />
+                <ValidationMessage For="() => User.Email" class="text-danger" />
+            </div>
+
+            <button type="submit" class="btn btn-primary form-button">Save</button>
+        </EditForm>
+    </div>
+}
+
+<div class="back-link">
+    <a href="/users">
+        <Icon Name="IconName.ArrowLeft" Size="IconSize.x5" />
+    </a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    public User? User { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        User = await DB.Users.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (User is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    public async Task UpdateUser()
+    {
+        DB.Attach(User!).State = EntityState.Modified;
+
+        try
+        {
+            await DB.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!UserExists(User!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/users");
+    }
+
+    bool UserExists(int id)
+    {
+        return DB.Users.Any(e => e.Id == id);
+    }
+}

@@ -1,0 +1,70 @@
+﻿@page "/users/delete"
+
+@using Microsoft.EntityFrameworkCore
+@using Dashboard.Model
+@inject Dashboard.Connect.DashboardDbContext DB
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete User</PageTitle>
+
+
+<div class="delete-container">
+    <h3 class="warning-text">Are you sure you want to delete this user?</h3>
+    <div class="user-details">
+        <hr />
+        @if (user is null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <dl class="row">
+                <dt class="col-sm-3 detail-label">Username</dt>
+                <dd class="col-sm-9 detail-value">@user.Username</dd>
+
+                <dt class="col-sm-3 detail-label">Password</dt>
+                <dd class="col-sm-9 detail-value">@user.Password</dd>
+
+                <dt class="col-sm-3 detail-label">Email</dt>
+                <dd class="col-sm-9 detail-value">@user.Email</dd>
+            </dl>
+            <EditForm method="post" Model="user" OnValidSubmit="DeleteUser" FormName="delete" class="delete-form">
+                <button type="submit" class="btn btn-danger" disabled="@(user is null)">
+                    <Icon Name="IconName.TrashFill" Size="IconSize.x6" />
+                </button>
+
+                <a href="/users" class="btn btn-secondary">
+                    <Icon Name="IconName.ArrowLeft" Size="IconSize.x6" />
+                </a>
+
+            </EditForm>
+        }
+    </div>
+</div>
+
+@code {
+    User? user;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await DB.Users.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (user is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    public async Task DeleteUser()
+    {
+        if (user != null)
+        {
+            DB.Users.Remove(user);
+            await DB.SaveChangesAsync();
+            NavigationManager.NavigateTo("/users");
+        }
+    }
+}

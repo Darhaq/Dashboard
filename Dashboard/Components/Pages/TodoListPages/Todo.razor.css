@@ -1,0 +1,120 @@
+﻿/* Container for todo sidebar and note */
+.todo-container {
+    display: flex;
+    width: 600px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Sidebar styles */
+.sidebar {
+    width: 180px;
+    background-color: #f4f4f4;
+    border-left: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Pushes content to the top and bottom */
+    border-radius: 8px;
+}
+
+    .sidebar h3 {
+        margin-top: 0;
+        white-space: nowrap; /* Prevents text from wrapping to the next line */
+        overflow: hidden;    /* Ensures that overflowing content is hidden */
+        text-overflow: ellipsis; /* Adds ellipsis (...) if the text overflows */
+    }
+
+    .sidebar ul {
+        list-style-type: none;
+        padding: 0;
+        margin-top: 5px;
+        flex: 1;
+    }
+
+    .sidebar li {
+        padding: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        .sidebar li.active {
+            background-color: #ffd700;
+            color: black;
+        }
+
+        .sidebar li:hover {
+            background-color: #ffd700;
+        }
+
+/* Center the add-todo button */
+.add-todo-button {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center; /* Centers the button horizontally */
+}
+    .add-todo-button:hover {
+        transition: 0.3s;
+        transform: translateY(-5px);
+    }
+
+.addbtn {
+    border: none;
+    color: black;
+    border-radius: 50%;
+    background-color: #ffd700;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+    .addbtn:hover {
+        transition: 0.3s;
+        color:black;
+    }
+    
+/* Sticky note container */
+.sticky-note-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Sticky note styles */
+.sticky-note {
+    border: 1px solid var(--sticky-note-border-color);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    background-color: var(--sticky-note-background-color);
+    width: 420px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Pushes content to top and action buttons to bottom */
+    position: relative; /* Required for positioning action buttons absolutely */
+}
+
+/* Title styles */
+.title h3 {
+    margin: 0;
+}
+
+/* Text styles */
+.text {
+    flex: 1;
+}
+
+/* Action buttons hidden by default and shown on hover */
+.actionButtons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: flex-end; /* Aligns action buttons to the right */
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.3s; /* Smooth transition for showing/hiding */
+    position: absolute;
+    bottom: 20px; /* Position at the bottom of the sticky note */
+    right: 20px; /* Align to the right of the sticky note */
+}
+
+.sticky-note:hover .actionButtons {
+    opacity: 1; /* Show action buttons when sticky note is hovered over */
+}

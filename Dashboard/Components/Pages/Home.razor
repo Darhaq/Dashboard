@@ -1,0 +1,218 @@
+﻿@page "/"
+@using Dashboard.Components.Pages.CalendarPage
+@using Dashboard.Components.Pages.NewsPage
+@using Dashboard.Components.Pages.WeatherPage
+@using Dashboard.Components.Pages.MoviesPage
+@using Dashboard.Components.Pages.TodoListPages
+@using Dashboard.Components.Pages.Login
+@using Microsoft.AspNetCore.Components.Authorization
+@using Dashboard.Model
+@inject DashboardDbContext DB
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject Dashboard.Services.LoginService loginService
+
+<PageTitle>Home</PageTitle>
+
+
+@if (!loginService.IsLoggedIn)
+{
+    <div class="notlogin-container">
+        <p class="login-message">Login to Personalize your Dashboard!</p>
+
+
+    </div>
+
+}
+else
+{
+    <div class="dashboard-container">
+        @if (showMovies)
+        {
+            <div class="widget-container">
+                <div class="widget-header">
+                    <h2>Movies</h2>
+                    <button class="remove-btn" @onclick="RemoveMovies">
+                        <Icon Name="IconName.XLg" Size="IconSize.x3" Style=" color: red; " />
+                    </button>
+                </div>
+                <Movies />
+            </div>
+        }
+        @if (showWeather)
+        {
+            <div class="widget-container">
+                <div class="widget-header">
+                    <h2>Weather</h2>
+                    <button class="remove-btn" @onclick="RemoveWeather">
+                        <Icon Name="IconName.XLg" Size="IconSize.x3" Style=" color: red; " />
+                    </button>
+                </div>
+                <Weather />
+            </div>
+        }
+        @if (showCalendar)
+        {
+            <div class="widget-container">
+                <div class="widget-header">
+                    <h2>Calendar</h2>
+                    <button class="remove-btn" @onclick="RemoveCalendar">
+                        <Icon Name="IconName.XLg" Size="IconSize.x3" Style=" color: red; " />
+                    </button>
+                </div>
+                <Calendar />
+            </div>
+        }
+        @if (showNews)
+        {
+            <div class="widget-container">
+                <div class="widget-header">
+                    <h2>News</h2>
+                    <button class="remove-btn" @onclick="RemoveNews">
+                        <Icon Name="IconName.XLg" Size="IconSize.x3" Style=" color: red; " />
+                    </button>
+                </div>
+                <News />
+            </div>
+        }
+        @if (showTodo)
+        {
+            <div class="widget-container">
+                <div class="widget-header">
+                    <h2>Notes</h2>
+                    <button class="remove-btn" @onclick="RemoveTodo">
+                        <Icon Name="IconName.XLg" Size="IconSize.x3" Style=" color: red; " />
+                    </button>
+                </div>
+                <Todo />
+            </div>
+        }
+    </div>
+
+    <div class="floating-controls" @onclick="ToggleControlPanel">
+        <Icon Name="IconName.Plus" Size="IconSize.x3" Style="" />
+    </div>
+
+    @if (showControlPanel)
+    {
+        <div class="control-panel">
+            <button class="add-btn" @onclick="AddMovies">Add Movies</button>
+            <button class="add-btn" @onclick="AddWeather">Add Weather</button>
+            <button class="add-btn" @onclick="AddNews">Add News</button>
+            <button class="add-btn" @onclick="AddTodo">Add Todo</button>
+            <button class="add-btn" @onclick="AddCalendar">Add Calendar</button>
+        </div>
+    }
+}
+
+
+@code {
+    // Controls visibility of the widgets, not visible as default
+    private bool showMovies = false;
+    private bool showWeather = false;
+    private bool showNews = false;
+    private bool showTodo = false;
+    private bool showCalendar = false;
+    private bool showControlPanel = false;
+
+    private int userId; // Stores the user's ID
+
+    protected override async Task OnInitializedAsync()
+    {
+        userId = loginService.Id; // Get the user ID from the login service
+
+        // Fetch the current dashboard state from the database
+        var state = await DB.GetDashboardStateAsync(userId);
+        if (state != null)
+        {
+            showMovies = state.ShowMovies;
+            showWeather = state.ShowWeather;
+            showNews = state.ShowNews;
+            showTodo = state.ShowTodo;
+            showCalendar = state.ShowCalendar;
+        }
+    }
+
+
+    private async Task SaveDashboardState()
+    {
+        // Save the current dashboard state to the database
+        var state = new DashboardState
+            {
+                UserId = userId,
+                ShowMovies = showMovies,
+                ShowWeather = showWeather,
+                ShowNews = showNews,
+                ShowTodo = showTodo,
+                ShowCalendar = showCalendar
+            };
+
+        await DB.SaveDashboardStateAsync(state);
+    }
+
+    private async Task RemoveMovies()
+    {
+        showMovies = false;
+        await SaveDashboardState();
+    }
+    private async Task RemoveWeather()
+    {
+        showWeather = false;
+        await SaveDashboardState();    
+    }
+    private async Task RemoveCalendar()
+    {
+        showCalendar = false;
+        await SaveDashboardState();
+    }
+
+    private async Task RemoveNews()
+    {
+        showNews = false;
+        await SaveDashboardState();
+    }
+
+    private async Task RemoveTodo()
+    {
+        showTodo = false;
+        await SaveDashboardState();
+    }
+
+    private async Task AddMovies()
+    {
+        showMovies = true;
+        showControlPanel = false;
+        await SaveDashboardState();
+    }
+    private async Task AddWeather()
+    {
+        showWeather = true;
+        showControlPanel = false;
+        await SaveDashboardState();
+    }
+    private async Task AddCalendar()
+    {
+        showCalendar = true;
+        showControlPanel = false;
+        await SaveDashboardState();
+    }
+
+    private async Task AddNews()
+    {
+        showNews = true;
+        showControlPanel = false;
+        await SaveDashboardState();
+    }
+
+    private async Task AddTodo()
+    {
+        showTodo = true;
+        showControlPanel = false;
+        await SaveDashboardState();
+
+    }
+
+    private void ToggleControlPanel()
+    {
+        showControlPanel = !showControlPanel;
+    }
+}

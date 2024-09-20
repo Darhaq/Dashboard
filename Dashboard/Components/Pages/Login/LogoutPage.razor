@@ -1,0 +1,38 @@
+﻿@page "/logout"
+
+@inject NavigationManager Nav
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+@inject Dashboard.Services.LoginService loginService
+
+<h3>Logging Out...</h3>
+
+
+
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        //if user is logged in and clicks logout it redirect them to this page, and logs them out
+        if (loginService.IsLoggedIn)
+        {
+
+            loginService.Id = 0;
+            loginService.Username = string.Empty;
+            loginService.IsLoggedIn = false;
+
+
+            await Task.Delay(1000);
+            Nav.NavigateTo("/",true);
+
+        }
+        else 
+        {//if user not logged in and trying to logout, redirect them to login page
+            await Task.Delay(1000);
+
+            Nav.NavigateTo("/login",true);
+        }
+    }
+
+}

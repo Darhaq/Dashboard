@@ -1,0 +1,98 @@
+﻿@page "/todoLists/edit"
+
+@using Microsoft.EntityFrameworkCore
+@using Dashboard.Model
+@inject Dashboard.Connect.DashboardDbContext DB
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h4>TodoList</h4>
+<hr />
+@if (TodoList is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="TodoList" OnValidSubmit="UpdateTodoList" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <input type="hidden" name="TodoList.Id" value="@TodoList.Id" />
+                <div class="mb-3">
+                    <label for="userid" class="form-label">UserId:</label>
+                    <InputNumber id="userid" @bind-Value="TodoList.UserId" class="form-control" />
+                    <ValidationMessage For="() => TodoList.UserId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title:</label>
+                    <InputText id="title" @bind-Value="TodoList.Title" class="form-control" />
+                    <ValidationMessage For="() => TodoList.Title" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description:</label>
+                    <InputText id="description" @bind-Value="TodoList.Description" class="form-control" />
+                    <ValidationMessage For="() => TodoList.Description" class="text-danger" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/todo">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    public TodoList? TodoList { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        TodoList ??= await DB.TodoLists.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (TodoList is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see https://aka.ms/RazorPagesCRUD.
+    public async Task UpdateTodoList()
+    {
+        DB.Attach(TodoList!).State = EntityState.Modified;
+
+        try
+        {
+            await DB.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!TodoListExists(TodoList!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/todo");
+    }
+
+    bool TodoListExists(int id)
+    {
+        return DB.TodoLists.Any(e => e.Id == id);
+    }
+}
